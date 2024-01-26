@@ -85,7 +85,6 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/storage.admin"
 ```
---->
 
 ### 6. Create a Workload Identity Pool for GitHub
 A workload identity pool is an entity that lets you manage external identities. In general, we recommend creating a new pool for each non-Google Cloud environment that needs to access Google Cloud resources, such as development, staging, or production environments.
