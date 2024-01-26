@@ -146,6 +146,13 @@ WORKLOAD_IDENTITY_PROVIDER_LOCATION=$(gcloud iam workload-identity-pools provide
   --format="value(name)")
 ```
 
+** Important: We need to make the application public, therefore, give access to the service url. Run the following command: **
+```
+gcloud run services add-iam-policy-binding app \
+  --member="allUsers" \
+  --role="roles/run.invoker"
+```
+
 ### GitHub Actions Workflow
 Before editing the GitHub action yml file, make sure to get the Workload Identity Provider Location and the Service Account URL
 
