@@ -1,0 +1,78 @@
+# This is a basic workflow to help get started with Actions
+name: Continuous Delivery
+
+# Control when the workflow will run
+on:
+  # Triggers the workflow when there a push to main or if there is a pull request only for the main branch
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+  # allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow only will contain a single job called "deploy"
+  deploy:
+    # the type of runner that the job will run on (a lot of people use this, idk why)
+    runs-on: ubuntu-latest
+
+    # add "id-token" with the indended permissions
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    # where environmental variables can be set for the session of the run
+    env:
+      # name for the docker image that will be produced (it contains the given project id)
+      IMAGE_NAME: gcr.io/fast-api-docker-gha-test/app
+
+    # Steps represent sequence of tasks that will be executed as part of the job
+    steps:
+      # checks out your repository under $GITHUB_WORKSPACE, so that the job can access it
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      # get github actions authenticated in google cloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          # Here we set the workload identity provider and service account with what we obtained in the terminal
+          workload_identity_provider: "github-actions-service-account@PROJECT_ID.iam.gserviceaccount.com"
+          service_account: "github-actions-service-account@fast-api-docker-gha-test.iam.gserviceaccount.com"
+
+      # Configure docker in google cloud (do not know why use --quiet)
+      - name: Configure Docker
+        run: gcloud auth configure-docker --quiet
+
+      # Build the docker image
+      - name: Build Docker Image
+        run: docker build -t $IMAGE_NAME .
+
+      # push the docker image into the google artifact/container registry
+      - name: Push Docker Image
+        run: docker push $IMAGE_NAME
+
+      # finally, deploy the docker image
+      - name: Deploy Docker Image
+        uses: "google-github-actions/deploy-cloudrun@v0"
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          region: us-east1
+          service: app
+          flags: --port=8080
+
+      # example of using the output
+      - name: Test URL
+        run: curl "${{ steps.deploy.outputs.url }}"
+
+
+
+
+
+
+
+      
+      
