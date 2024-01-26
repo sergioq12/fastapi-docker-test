@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r /code/requirements.txt
 COPY ./app /code/app
 
 # run the last command to make the app to run
-CMD ["uvicorn", "app.index:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.index:app", "--host", "0.0.0.0", "--port", "8080"]
