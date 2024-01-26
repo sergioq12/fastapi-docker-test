@@ -40,7 +40,7 @@ jobs:
         uses: google-github-actions/auth@v0
         with:
           # Here we set the workload identity provider and service account with what we obtained in the terminal
-          workload_identity_provider: "github-actions-service-account@PROJECT_ID.iam.gserviceaccount.com"
+          workload_identity_provider: "projects/877311878150/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider"
           service_account: "github-actions-service-account@fast-api-docker-gha-test.iam.gserviceaccount.com"
 
       # Configure docker in google cloud (do not know why use --quiet)
@@ -67,12 +67,3 @@ jobs:
       # example of using the output
       - name: Test URL
         run: curl "${{ steps.deploy.outputs.url }}"
-
-
-
-
-
-
-
-      
-      
