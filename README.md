@@ -62,7 +62,7 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
   --display-name="GitHub Actions Service Account"
 ```
 
-<!---### 5. Bind the Service Account to the Roles that the Services must interact with --->
+<!---### 5. Bind the Service Account to the Roles that the Services must interact with
 This is personally something new for me. However, I believe that this binds some roles to the service account so that different tasks can be accomplished later by this service account that we created. Which again, is the service account that github actions will be using.
 
 **Service Account User**
@@ -85,6 +85,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/storage.admin"
 ```
+--->
 
 ### 6. Create a Workload Identity Pool for GitHub
 A workload identity pool is an entity that lets you manage external identities. In general, we recommend creating a new pool for each non-Google Cloud environment that needs to access Google Cloud resources, such as development, staging, or production environments.
