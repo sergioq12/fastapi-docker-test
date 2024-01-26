@@ -1,8 +1,6 @@
 # Testing FastAPI Deployment with GitHub Actions
 The goal of this repository is to plan, design, and test the deployment of a FastAPI application into Google Cloud.
 
-## Steps to be made
-
 ### Develop FastAPI application
 The application in the repository is a very simple mock API done for purposes of testing.
 
@@ -41,7 +39,9 @@ Once you can use it:
 
 3. Enable the APIs that are needed for the project to work
 We will use the Artifact Registry, IAM Credential, Container Registry and Cloud Run.
-** Note: I would suggest to also enable Compute Engine as it will allow gcloud cli to be able to automatically set the region when deploying.
+
+** Note: I would suggest to also enable Compute Engine as it will allow gcloud cli to be able to automatically set the region when deploying. **
+
 To accomplish it can be done with:
 ```
 gcloud services enable \
@@ -52,10 +52,10 @@ gcloud services enable \
 ```
 
 4. Create a Service Account that will be used by GitHub Actions
-A service account is a special kind of account used by an application or compute workload, rather than a person.
-Service accounts are managed by Identity and Access Management (IAM).
+A service account is a special kind of account used by an application or compute workload, rather than a person. Service accounts are managed by Identity and Access Management (IAM).
 
-In this case it will be GitHub Actions the one interacting with our Google Cloud Project.
+In this case, it will be GitHub Actions the one interacting with our Google Cloud Project.
+
 Run the following command to create the service account
 ```
 gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
@@ -63,9 +63,7 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
 ```
 
 5. Bind the Service Account to the Roles that the Services must interact with
-This is personally something new for me. However, I believe that this binds some roles to the service account so that
-different tasks can be accomplished later by this service account that we created. Which again, is the service
-account that github actions will be using.
+This is personally something new for me. However, I believe that this binds some roles to the service account so that different tasks can be accomplished later by this service account that we created. Which again, is the service account that github actions will be using.
 
 **Service Account User**
 ```
@@ -88,7 +86,67 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --role="roles/storage.admin"
 ```
 
+6. Create a Workload Identity Pool for GitHub
+A workload identity pool is an entity that lets you manage external identities. In general, we recommend creating a new pool for each non-Google Cloud environment that needs to access Google Cloud resources, such as development, staging, or production environments.
 
+Run the command:
+```
+gcloud iam workload-identity-pools create $WORKLOAD_IDENTITY_POOL \
+  --location="global" \
+  --display-name="GitHub Pool"
+```
+
+7. Create a Workload Identity Provider for GitHub
+A workload identity pool provider is an entity that describes a relationship between Google Cloud and your IdP (Identity Provider).
+
+Run the command:
+```
+gcloud iam workload-identity-pools providers create-oidc $WORKLOAD_IDENTITY_PROVIDER \
+  --location="global" \
+  --workload-identity-pool=$WORKLOAD_IDENTITY_POOL \
+  --display-name="GitHub Provider" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
+  --issuer-uri="https://token.actions.githubusercontent.com"
+```
+
+8. Retrieve the Workload Identity Pool ID
+I am not sure what is this, but I believe its only getting the ID google gave to the workload identity pool we inserted previously.
+
+Run the command:
+```
+WORKLOAD_IDENTITY_POOL_ID=$(gcloud iam workload-identity-pools \
+  describe $WORKLOAD_IDENTITY_POOL \
+  --location="global" \
+  --format="value(name)")
+```
+
+9. Allow authentications from the Workload Identity Provider originating from the repository
+I would suggest to put the github repository name in an environmental variable as it will be reused multiple times
+```
+export GITHUB_REPO_NAME=$NAME_OF_REPO
+```
+
+Then, run this command:
+```
+gcloud iam service-accounts add-iam-policy-binding \
+  $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${GITHUB_REPO_NAME}"
+```
+
+10. Finally, extract the Workload Identity Provider resource name:
+I believe this is mainly getting the location of the workload identity provider.
+
+Run the following command:
+```
+WORKLOAD_IDENTITY_PROVIDER_LOCATION=$(gcloud iam workload-identity-pools providers \
+  describe $WORKLOAD_IDENTITY_PROVIDER \
+  --location="global" \
+  --workload-identity-pool=$WORKLOAD_IDENTITY_POOL \
+  --format="value(name)")
+```
+
+### GitHub Actions Workflow
 
 
 
