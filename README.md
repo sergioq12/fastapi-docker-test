@@ -61,8 +61,8 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
   --project "${PROJECT_ID}" \
   --display-name="GitHub Actions Service Account"
 ```
-<!---
-### 5. Bind the Service Account to the Roles that the Services must interact with
+
+<!---### 5. Bind the Service Account to the Roles that the Services must interact with --->
 This is personally something new for me. However, I believe that this binds some roles to the service account so that different tasks can be accomplished later by this service account that we created. Which again, is the service account that github actions will be using.
 
 **Service Account User**
