@@ -39,6 +39,58 @@ Once you can use it:
   - Make sure that you have set it up and when you run the command `gcloud init` you can reuse the previous configuration and log in with your account.
   - Set the project to be working with running the command `gcloud config set project $PROJECT_ID`
 
+3. Enable the APIs that are needed for the project to work
+We will use the Artifact Registry, IAM Credential, Container Registry and Cloud Run.
+** Note: I would suggest to also enable Compute Engine as it will allow gcloud cli to be able to automatically set the region when deploying.
+To accomplish it can be done with:
+```
+gcloud services enable \
+  artifactregistry.googleapis.com \
+  iamcredentials.googleapis.com \
+  containerregistry.googleapis.com \
+  run.googleapis.com
+```
+
+4. Create a Service Account that will be used by GitHub Actions
+A service account is a special kind of account used by an application or compute workload, rather than a person.
+Service accounts are managed by Identity and Access Management (IAM).
+
+In this case it will be GitHub Actions the one interacting with our Google Cloud Project.
+Run the following command to create the service account
+```
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
+  --display-name="GitHub Actions Service Account"
+```
+
+5. Bind the Service Account to the Roles that the Services must interact with
+This is personally something new for me. However, I believe that this binds some roles to the service account so that
+different tasks can be accomplished later by this service account that we created. Which again, is the service
+account that github actions will be using.
+
+**Service Account User**
+```
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
+```
+
+**Developer User**
+```
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/run.developer"
+```
+
+**Storage Admin**
+```
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/storage.admin"
+```
+
+
+
+
 
 
 
