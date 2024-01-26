@@ -110,7 +110,7 @@ gcloud iam workload-identity-pools providers create-oidc $WORKLOAD_IDENTITY_PROV
 ```
 
 8. Retrieve the Workload Identity Pool ID
-I am not sure what is this, but I believe its only getting the ID google gave to the workload identity pool we inserted previously.
+I am not sure what is this, but I believe it's only getting the ID Google gave to the workload identity pool we inserted previously.
 
 Run the command:
 ```
@@ -121,7 +121,7 @@ WORKLOAD_IDENTITY_POOL_ID=$(gcloud iam workload-identity-pools \
 ```
 
 9. Allow authentications from the Workload Identity Provider originating from the repository
-I would suggest to put the github repository name in an environmental variable as it will be reused multiple times
+I would suggest putting the GitHub repository name in an environmental variable as it will be reused multiple times
 ```
 export GITHUB_REPO_NAME=$NAME_OF_REPO
 ```
@@ -147,7 +147,13 @@ WORKLOAD_IDENTITY_PROVIDER_LOCATION=$(gcloud iam workload-identity-pools provide
 ```
 
 ### GitHub Actions Workflow
+Before editing the GitHub action yml file, make sure to get the Workload Identity Provider Location and the Service Account URL
 
+Run the commands:
+- ```echo $WORKLOAD_IDENTITY_PROVIDER_LOCATION```
+- ```echo $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com```
+
+At this point, the best to do is to the GitHub action file itself. Then, study what is happening and read the comments
 
 
 
