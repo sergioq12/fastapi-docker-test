@@ -61,7 +61,7 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
   --project "${PROJECT_ID}" \
   --display-name="GitHub Actions Service Account"
 ```
-
+<---
 ### 5. Bind the Service Account to the Roles that the Services must interact with
 This is personally something new for me. However, I believe that this binds some roles to the service account so that different tasks can be accomplished later by this service account that we created. Which again, is the service account that github actions will be using.
 
@@ -85,6 +85,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/storage.admin"
 ```
+--->
 
 ### 6. Create a Workload Identity Pool for GitHub
 A workload identity pool is an entity that lets you manage external identities. In general, we recommend creating a new pool for each non-Google Cloud environment that needs to access Google Cloud resources, such as development, staging, or production environments.
@@ -92,32 +93,38 @@ A workload identity pool is an entity that lets you manage external identities. 
 Run the command:
 ```
 gcloud iam workload-identity-pools create $WORKLOAD_IDENTITY_POOL \
+  --project="${PROJECT_ID}" \
   --location="global" \
   --display-name="GitHub Pool"
 ```
 
-### 7. Create a Workload Identity Provider for GitHub
-A workload identity pool provider is an entity that describes a relationship between Google Cloud and your IdP (Identity Provider).
-
-Run the command:
-```
-gcloud iam workload-identity-pools providers create-oidc $WORKLOAD_IDENTITY_PROVIDER \
-  --location="global" \
-  --workload-identity-pool=$WORKLOAD_IDENTITY_POOL \
-  --display-name="GitHub Provider" \
-  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
-  --issuer-uri="https://token.actions.githubusercontent.com"
-```
-
-### 8. Retrieve the Workload Identity Pool ID
+### 7. Retrieve the Workload Identity Pool ID
 I am not sure what is this, but I believe it's only getting the ID Google gave to the workload identity pool we inserted previously.
 
 Run the command:
 ```
 WORKLOAD_IDENTITY_POOL_ID=$(gcloud iam workload-identity-pools \
   describe $WORKLOAD_IDENTITY_POOL \
+  --project="${PROJECT_ID}" \
   --location="global" \
   --format="value(name)")
+```
+
+This value should be in the format of:
+`projects/123456789/locations/global/workloadIdentityPools/github`
+
+### 8. Create a Workload Identity Provider for GitHub
+A workload identity pool provider is an entity that describes a relationship between Google Cloud and your IdP (Identity Provider).
+
+Run the command:
+```
+gcloud iam workload-identity-pools providers create-oidc $WORKLOAD_IDENTITY_PROVIDER \
+  --project="${PROJECT_ID}" \
+  --location="global" \
+  --workload-identity-pool=$WORKLOAD_IDENTITY_POOL \
+  --display-name="GitHub Action Provider" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
+  --issuer-uri="https://token.actions.githubusercontent.com"
 ```
 
 ### 9. Allow authentications from the Workload Identity Provider originating from the repository
@@ -131,7 +138,7 @@ Then, run this command:
 gcloud iam service-accounts add-iam-policy-binding \
   $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
   --role="roles/iam.workloadIdentityUser" \
-  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${GITHUB_REPO_NAME}"
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
 ```
 
 ### 10. Finally, extract the Workload Identity Provider resource name:
@@ -141,17 +148,20 @@ Run the following command:
 ```
 WORKLOAD_IDENTITY_PROVIDER_LOCATION=$(gcloud iam workload-identity-pools providers \
   describe $WORKLOAD_IDENTITY_PROVIDER \
+  --project="${PROJECT_ID}" \
   --location="global" \
   --workload-identity-pool=$WORKLOAD_IDENTITY_POOL \
   --format="value(name)")
 ```
 
+<---
 ** Important: We need to make the application public, therefore, give access to the service url. Run the following command: **
 ```
 gcloud run services add-iam-policy-binding app \
   --member="allUsers" \
   --role="roles/run.invoker"
 ```
+--->
 
 ### GitHub Actions Workflow
 Before editing the GitHub action yml file, make sure to get the Workload Identity Provider Location and the Service Account URL
