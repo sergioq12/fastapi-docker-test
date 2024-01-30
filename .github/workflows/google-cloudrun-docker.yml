@@ -25,6 +25,8 @@
 #
 #    Artifact Registry
 #      roles/artifactregistry.admin     (project or repository level)
+# 
+# SERGIO NOTE: MAKE SURE TO ADD THOSE ROLES THROUGH GCLOUD TO MAKE IT WORK!
 #
 #    NOTE: You should always follow the principle of least privilege when assigning IAM roles
 #
