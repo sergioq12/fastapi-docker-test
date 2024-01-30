@@ -1,5 +1,7 @@
 Look at this link for continuing trying: https://github.com/google-github-actions/auth?tab=readme-ov-file#indirect-wif
 
+This has been done with research from multiple, at least 20 different sites.
+
 # Testing FastAPI Deployment with GitHub Actions
 The goal of this repository is to plan, design, and test the deployment of a FastAPI application into Google Cloud.
 
