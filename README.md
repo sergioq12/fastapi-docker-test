@@ -116,12 +116,8 @@ gcloud iam workload-identity-pools providers create-oidc $WORKLOAD_IDENTITY_PROV
 ```
 
 ### 8. Allow authentications from the Workload Identity Provider originating from the repository
-I would suggest putting the GitHub repository name in an environmental variable as it will be reused multiple times
-```
-export GITHUB_REPO_NAME=$NAME_OF_REPO
-```
+I believe this binds the github repository to the given service account so that it is allowed to be a workload identity user
 
-Then, run this command:
 ```
 gcloud iam service-accounts add-iam-policy-binding \
   $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
