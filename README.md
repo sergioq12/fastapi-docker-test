@@ -225,6 +225,8 @@ Note: the name of the service of Cloud Run is the same name that is given in the
 
 If the previous command is not run, the app will be deployed but it won't be able to be accessed publicly by any user.
 
+# Additional Notes
+
 ### What can you do when you want to shutdown, cut, or just don't allow users to insert your deployed application in Cloud Run?
 After some research, the best thing you can do is make the app 'private'. This means disable the `allUsers` configuration in the **Cloud Run Invoker permission**. To accomplish I suggest going to your GCP project in the web app. Then, go search the **Cloud Run API**. Once you are there, click on the service running. Once inside go to **Security** tab, and in the **Authentication** card/board make the configuration to --> Require Authentication. This will disable the ability for public users to enter the application, only users with custom project saved authentication.
 
