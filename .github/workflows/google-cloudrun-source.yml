@@ -50,6 +50,9 @@ on:
   push:
     branches: [ "main" ]
 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 env:
   PROJECT_ID: fastapi-gha-test # TODO: update Google Cloud project id
   SERVICE: fastapi-gha # TODO: update Cloud Run service name
@@ -87,6 +90,8 @@ jobs:
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
+          env_vars: |
+            TEST_VARIABLE= ${{ secrets.ENV_TEST_VARIABLE }}
           # NOTE: If required, update to the appropriate source folder
           source: ./
 
